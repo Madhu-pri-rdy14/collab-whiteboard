@@ -3,7 +3,8 @@ import { io } from 'socket.io-client';
 import * as fabric from 'fabric';
 import jsPDF from 'jspdf';
 
-const socket = io('http://localhost:3001');
+const socket = io(process.env.REACT_APP_SOCKET_URL);
+
 
 const Whiteboard = () => {
   const canvasRef = useRef(null);

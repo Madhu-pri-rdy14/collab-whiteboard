@@ -11,12 +11,18 @@ const server = http.createServer(app);
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://collab-whiteboard-sg6g.vercel.app' 
+  'https://collab-whiteboard-sg6g.vercel.app'
 ];
 
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST'],
   credentials: true
 
@@ -40,11 +46,18 @@ const Room = mongoose.model('Room', RoomSchema);
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS (socket.io)'));
+      }
+    },
     methods: ['GET', 'POST'],
-    credentials: true  
+    credentials: true
   }
 });
+
 
 io.on("connection", (socket) => {
   console.log(`🔌 ${socket.id} connected`);

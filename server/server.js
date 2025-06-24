@@ -25,7 +25,6 @@ app.use(cors({
   },
   methods: ['GET', 'POST'],
   credentials: true
-
 }));
 
 app.use(express.json());
@@ -107,7 +106,6 @@ app.post('/api/create-room', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
 
 app.post('/api/join-room', async (req, res) => {
   const { roomId, password } = req.body;

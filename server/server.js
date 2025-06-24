@@ -19,6 +19,7 @@ app.use(cors({
   origin: allowedOrigins,
   methods: ['GET', 'POST'],
   credentials: true
+
 }));
 
 app.use(express.json());
@@ -40,7 +41,8 @@ const Room = mongoose.model('Room', RoomSchema);
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
-    methods: ['GET', 'POST']
+    methods: ['GET', 'POST'],
+    credentials: true  
   }
 });
 

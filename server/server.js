@@ -8,21 +8,27 @@ require('dotenv').config();
 const app = express();
 const server = http.createServer(app);
 
-// ✅ CORS for localhost & Vercel (adjust as needed)
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://collab-whiteboard-sg6g.vercel.app' 
+];
+
+
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://collab-whiteboard-xi.vercel.app'],
+  origin: allowedOrigins,
   methods: ['GET', 'POST'],
   credentials: true
 }));
 
 app.use(express.json());
 
-// ✅ Updated MongoDB connection (cleaner options)
+
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ MongoDB Error:", err.message));
 
-// ✅ Mongoose model
+
 const RoomSchema = new mongoose.Schema({
   roomId: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -30,10 +36,10 @@ const RoomSchema = new mongoose.Schema({
 });
 const Room = mongoose.model('Room', RoomSchema);
 
-// ✅ Socket.IO setup
+
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:3000', 'https://collab-whiteboard-xi.vercel.app'],
+    origin: allowedOrigins,
     methods: ['GET', 'POST']
   }
 });
@@ -64,7 +70,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// ✅ Create Room API
+
 app.post('/api/create-room', async (req, res) => {
   const { roomId, password } = req.body;
   console.log("📥 Creating room:", roomId, password);
@@ -87,7 +93,7 @@ app.post('/api/create-room', async (req, res) => {
   }
 });
 
-// ✅ Join Room API
+
 app.post('/api/join-room', async (req, res) => {
   const { roomId, password } = req.body;
   console.log("🔑 Joining room:", roomId, password);
@@ -112,9 +118,11 @@ app.post('/api/join-room', async (req, res) => {
   }
 });
 
+
 app.get('/', (req, res) => {
   res.send('Whiteboard backend is running!');
 });
+
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {

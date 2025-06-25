@@ -32,7 +32,7 @@ cd collab-whiteboard
 In client/.env
 ini
 
-REACT_APP_SOCKET_URL=https://collab-whiteboard-xcce.onrender.com
+REACT_APP_SOCKET_URL=https://collab-whiteboard-oriq.onrender.com
 
 In server/.env
 

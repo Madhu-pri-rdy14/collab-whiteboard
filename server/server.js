@@ -10,7 +10,7 @@ const server = http.createServer(app);
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://collab-whiteboard-sg6g.vercel.app',
+  'https://collab-whiteboard-six.vercel.app',
   'https://collab-whiteboard-oriq.onrender.com'
 ];
 

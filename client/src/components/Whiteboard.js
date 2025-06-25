@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 import * as fabric from 'fabric';
 import jsPDF from 'jspdf';
 
-const socket = io('https://collab-whiteboard-xcce.onrender.com');
+const socket = io('https://collab-whiteboard-oriq.onrender.com');
 
 const Whiteboard = () => {
   const canvasRef = useRef(null);

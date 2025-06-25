@@ -66,10 +66,9 @@ npm start
 
  Live Demo
  
-Frontend: https://collab-whiteboard-sg6g.vercel.app
+Frontend: https://collab-whiteboard-six.vercel.app/
 
-Backend: https://collab-whiteboard-xcce.onrender.com
-
+Backend: https://collab-whiteboard-oriq.onrender.com
  Author
 Madhu Priya
 GitHub: Madhu-pri-rdy14

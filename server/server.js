@@ -10,29 +10,15 @@ const server = http.createServer(app);
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://collab-whiteboard-sg6g.vercel.app',
-  
+  'https://collab-whiteboard-sg6g.vercel.app'
 ];
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin) {
-      callback(null, true);
-      return;
-    }
-    
-    const isAllowed = allowedOrigins.some(allowedOrigin => {
-      if (typeof allowedOrigin === 'string') {
-        return allowedOrigin === origin;
-      } else {
-        return allowedOrigin.test(origin);
-      }
-    });
-    
-    if (isAllowed) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.log('CORS blocked origin:', origin);
+
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -60,23 +46,10 @@ const activeRooms = new Map();
 const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
-      if (!origin) {
-        callback(null, true);
-        return;
-      }
-      
-      const isAllowed = allowedOrigins.some(allowedOrigin => {
-        if (typeof allowedOrigin === 'string') {
-          return allowedOrigin === origin;
-        } else {
-          return allowedOrigin.test(origin);
-        }
-      });
-      
-      if (isAllowed) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.log('CORS blocked origin (socket.io):', origin);
+
         callback(new Error('Not allowed by CORS (socket.io)'));
       }
     },
@@ -86,25 +59,11 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id, 'from:', socket.handshake.address);
+  console.log('User connected:', socket.id);
 
-  socket.on('error', (error) => {
-    console.error('Socket error:', error);
-  });
-
-  socket.on('join-room', async ({ roomId, username, password }) => {
+  socket.on('join-room', async ({ roomId, username }) => {
     try {
-      const room = await Room.findOne({ roomId });
-      if (!room) {
-        socket.emit('error', 'Room not found');
-        return;
-      }
       
-      if (password && room.password !== password) {
-        socket.emit('error', 'Incorrect password');
-        return;
-      }
-
       socket.join(roomId);
       if (!activeRooms.has(roomId)) {
         activeRooms.set(roomId, {
@@ -120,6 +79,7 @@ io.on('connection', (socket) => {
         color: generateUserColor()
       });
 
+      const room = await Room.findOne({ roomId });
       if (room && room.canvasData) {
         socket.emit('canvas-state', room.canvasData);
       }
@@ -297,8 +257,7 @@ function generateUserColor() {
 }
 
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Local: http://localhost:${PORT}`);
-  console.log(`Network: http://0.0.0.0:${PORT}`);
+
 });

@@ -10,7 +10,8 @@ const server = http.createServer(app);
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://collab-whiteboard-sg6g.vercel.app'
+  'https://collab-whiteboard-sg6g.vercel.app',
+  'https://collab-whiteboard-oriq.onrender.com'
 ];
 
 app.use(cors({
@@ -63,7 +64,7 @@ io.on('connection', (socket) => {
 
   socket.on('join-room', async ({ roomId, username }) => {
     try {
-      
+
       socket.join(roomId);
       if (!activeRooms.has(roomId)) {
         activeRooms.set(roomId, {

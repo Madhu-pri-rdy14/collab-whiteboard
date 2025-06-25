@@ -1,25 +1,60 @@
-
 .App {
   text-align: center;
   font-family: Arial, sans-serif;
   padding: 20px;
+  background-color: #f9f9f9;
 }
 
 .login-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  padding: 20px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  max-width: 320px;
+  margin: 0 auto 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.login-container input {
-  padding: 8px;
-  width: 200px;
-}
-
+.login-container input,
 .login-container select {
-  padding: 8px;
-  width: 200px;
+  padding: 10px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.login-container button {
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login-container .create-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.login-container .create-btn:hover {
+  background-color: #388e3c;
+}
+
+.login-container .join-btn {
+  background-color: #2196f3;
+  color: white;
+}
+
+.login-container .join-btn:hover {
+  background-color: #1976d2;
 }
 
 .toolbar {
@@ -33,17 +68,24 @@
 .toolbar button {
   padding: 8px 12px;
   border: none;
-  background-color: #007bff;
+  background-color: #ff9800;
   color: white;
   cursor: pointer;
   border-radius: 4px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.toolbar button:hover {
+  background-color: #fb8c00;
 }
 
 .toolbar button:disabled {
-  background-color: #999;
+  background-color: #bbb;
   cursor: not-allowed;
 }
 
 canvas {
   border: 2px solid #ccc;
+  background-color: white;
 }

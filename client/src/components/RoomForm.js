@@ -18,9 +18,7 @@ const RoomForm = () => {
 
     try {
       const endpoint = mode === 'create' ? '/api/create-room' : '/api/join-room';
-
-      
-     const backendUrl = 'https://collab-whiteboard-xcce.onrender.com'; 
+      const backendUrl = 'https://collab-whiteboard-xcce.onrender.com';
 
       const res = await axios.post(`${backendUrl}${endpoint}`, {
         roomId,
@@ -28,19 +26,17 @@ const RoomForm = () => {
       });
 
       alert(res.data.message);
-
       localStorage.setItem('username', username);
       localStorage.setItem('roomId', roomId);
 
       navigate('/whiteboard');
     } catch (err) {
-      console.error('❌ Axios Error:', err);
       alert(err.response?.data?.message || 'Something went wrong');
     }
   };
 
   return (
-    <div className="room-form">
+    <div className="login-container">
       <h2>{mode === 'create' ? 'Create Room' : 'Join Room'}</h2>
       <form onSubmit={handleSubmit}>
         <input
@@ -64,14 +60,35 @@ const RoomForm = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">
+        <button
+          type="submit"
+          style={{
+            backgroundColor: mode === 'create' ? '#28a745' : '#17a2b8',
+            color: 'white',
+            padding: '8px 12px',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
           {mode === 'create' ? 'Create Room' : 'Join Room'}
         </button>
       </form>
 
       <p style={{ marginTop: '10px' }}>
         {mode === 'create' ? 'Want to join?' : 'Want to create?'}{' '}
-        <button type="button" onClick={() => setMode(mode === 'create' ? 'join' : 'create')}>
+        <button
+          type="button"
+          onClick={() => setMode(mode === 'create' ? 'join' : 'create')}
+          style={{
+            backgroundColor: '#6c757d',
+            color: 'white',
+            padding: '6px 10px',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
           Switch to {mode === 'create' ? 'Join' : 'Create'}
         </button>
       </p>

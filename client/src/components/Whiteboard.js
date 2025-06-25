@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 import * as fabric from 'fabric';
 import jsPDF from 'jspdf';
 
-const socket = io(process.env.REACT_APP_SOCKET_URL);
+const socket = io('https://collab-whiteboard-xcce.onrender.com');
 
 const Whiteboard = () => {
   const canvasRef = useRef(null);
@@ -45,24 +45,17 @@ const Whiteboard = () => {
 
     setCanvas(newCanvas);
 
-    socket.on('drawing', (data) => {
-      if (data?.type === 'clear') {
-        newCanvas.clear();
-        return;
-      }
-      fabric.util.enlivenObjects([data], ([obj]) => {
-        obj.selectable = false;
-        newCanvas.add(obj);
+    socket.on('drawing', (json) => {
+      newCanvas.loadFromJSON(json, () => {
         newCanvas.renderAll();
       });
     });
 
-    newCanvas.on('path:created', (e) => {
+    newCanvas.on('path:created', () => {
       const roomId = localStorage.getItem('roomId');
-      const path = e.path;
-      const data = path.toObject();
-      socket.emit('drawing', { roomId, data });
-      undoStack.current.push(JSON.stringify(newCanvas.toDatalessJSON()));
+      const json = newCanvas.toDatalessJSON();
+      socket.emit('drawing', json);
+      undoStack.current.push(JSON.stringify(json));
       redoStack.current = [];
     });
 
@@ -82,11 +75,10 @@ const Whiteboard = () => {
     };
   }, [isEditable]);
 
-  const sendDrawing = (object) => {
-    if (!isEditable) return;
+  const sendDrawing = () => {
     const roomId = localStorage.getItem('roomId');
-    const data = object.toObject();
-    socket.emit('drawing', { roomId, data });
+    const json = canvas.toDatalessJSON();
+    socket.emit('drawing', json);
   };
 
   const addShape = (type) => {
@@ -109,7 +101,7 @@ const Whiteboard = () => {
         return;
     }
     canvas.add(shape);
-    sendDrawing(shape);
+    sendDrawing();
     undoStack.current.push(JSON.stringify(canvas.toDatalessJSON()));
     redoStack.current = [];
   };
@@ -139,7 +131,7 @@ const Whiteboard = () => {
     canvas.add(text);
     canvas.setActiveObject(text);
     canvas.renderAll();
-    sendDrawing(text);
+    sendDrawing();
     undoStack.current.push(JSON.stringify(canvas.toDatalessJSON()));
     redoStack.current = [];
   };
@@ -148,20 +140,26 @@ const Whiteboard = () => {
     if (!canvas || undoStack.current.length === 0) return;
     redoStack.current.push(JSON.stringify(canvas.toDatalessJSON()));
     const last = undoStack.current.pop();
-    canvas.loadFromJSON(last, () => canvas.renderAll());
+    canvas.loadFromJSON(last, () => {
+      canvas.renderAll();
+      sendDrawing();
+    });
   };
 
   const redo = () => {
     if (!canvas || redoStack.current.length === 0) return;
     undoStack.current.push(JSON.stringify(canvas.toDatalessJSON()));
     const last = redoStack.current.pop();
-    canvas.loadFromJSON(last, () => canvas.renderAll());
+    canvas.loadFromJSON(last, () => {
+      canvas.renderAll();
+      sendDrawing();
+    });
   };
 
   const clearCanvas = () => {
     canvas.clear();
     if (!isEditable) canvas.selection = false;
-    sendDrawing({ toObject: () => ({ type: 'clear' }) });
+    sendDrawing();
     undoStack.current.push(JSON.stringify(canvas.toDatalessJSON()));
     redoStack.current = [];
   };

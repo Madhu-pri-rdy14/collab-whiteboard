@@ -41,8 +41,6 @@ REACT_APP_SOCKET_URL=https://collab-whiteboard-oriq.onrender.com
 In server/.env
 
 
-MONGODB_URI=your_mongo_connection_string
-
 PORT=3001
 
 3. Install dependencies

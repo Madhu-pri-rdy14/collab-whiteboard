@@ -5,7 +5,6 @@ import jsPDF from 'jspdf';
 
 const socket = io(process.env.REACT_APP_SOCKET_URL);
 
-
 const Whiteboard = () => {
   const canvasRef = useRef(null);
   const [canvas, setCanvas] = useState(null);
@@ -40,6 +39,10 @@ const Whiteboard = () => {
 
     if (!isEditable) newCanvas.selection = false;
 
+    newCanvas.on('selection:created', () => {
+      if (!isEditable) newCanvas.discardActiveObject().renderAll();
+    });
+
     setCanvas(newCanvas);
 
     socket.on('drawing', (data) => {
@@ -54,8 +57,17 @@ const Whiteboard = () => {
       });
     });
 
+    newCanvas.on('path:created', (e) => {
+      const roomId = localStorage.getItem('roomId');
+      const path = e.path;
+      const data = path.toObject();
+      socket.emit('drawing', { roomId, data });
+      undoStack.current.push(JSON.stringify(newCanvas.toDatalessJSON()));
+      redoStack.current = [];
+    });
+
     const saveState = () => {
-      undoStack.current.push(JSON.stringify(newCanvas.toJSON()));
+      undoStack.current.push(JSON.stringify(newCanvas.toDatalessJSON()));
       redoStack.current = [];
     };
 
@@ -71,6 +83,7 @@ const Whiteboard = () => {
   }, [isEditable]);
 
   const sendDrawing = (object) => {
+    if (!isEditable) return;
     const roomId = localStorage.getItem('roomId');
     const data = object.toObject();
     socket.emit('drawing', { roomId, data });
@@ -81,30 +94,24 @@ const Whiteboard = () => {
     let shape;
     switch (type) {
       case 'rect':
-        shape = new fabric.Rect({
-          width: 120, height: 80, fill: 'white', stroke: 'black', strokeWidth: 2, left: 100, top: 100
-        });
+        shape = new fabric.Rect({ width: 120, height: 80, fill: 'white', stroke: 'black', strokeWidth: 2, left: 100, top: 100 });
         break;
       case 'circle':
-        shape = new fabric.Circle({
-          radius: 50, fill: 'white', stroke: 'black', strokeWidth: 2, left: 150, top: 150
-        });
+        shape = new fabric.Circle({ radius: 50, fill: 'white', stroke: 'black', strokeWidth: 2, left: 150, top: 150 });
         break;
       case 'triangle':
-        shape = new fabric.Triangle({
-          width: 100, height: 100, fill: 'white', stroke: 'black', strokeWidth: 2, left: 200, top: 200
-        });
+        shape = new fabric.Triangle({ width: 100, height: 100, fill: 'white', stroke: 'black', strokeWidth: 2, left: 200, top: 200 });
         break;
       case 'line':
-        shape = new fabric.Line([50, 100, 200, 100], {
-          stroke: 'black', strokeWidth: 2
-        });
+        shape = new fabric.Line([50, 100, 200, 100], { stroke: 'black', strokeWidth: 2 });
         break;
       default:
         return;
     }
     canvas.add(shape);
     sendDrawing(shape);
+    undoStack.current.push(JSON.stringify(canvas.toDatalessJSON()));
+    redoStack.current = [];
   };
 
   const enablePen = () => {
@@ -128,28 +135,25 @@ const Whiteboard = () => {
   const addText = () => {
     if (!canvas || !isEditable) return;
     canvas.isDrawingMode = false;
-    const text = new fabric.IText('Enter text here', {
-      left: 100,
-      top: 100,
-      fontSize: 20,
-      fill: 'black',
-    });
+    const text = new fabric.IText('Enter text here', { left: 100, top: 100, fontSize: 20, fill: 'black' });
     canvas.add(text);
     canvas.setActiveObject(text);
     canvas.renderAll();
     sendDrawing(text);
+    undoStack.current.push(JSON.stringify(canvas.toDatalessJSON()));
+    redoStack.current = [];
   };
 
   const undo = () => {
     if (!canvas || undoStack.current.length === 0) return;
-    redoStack.current.push(JSON.stringify(canvas.toJSON()));
+    redoStack.current.push(JSON.stringify(canvas.toDatalessJSON()));
     const last = undoStack.current.pop();
     canvas.loadFromJSON(last, () => canvas.renderAll());
   };
 
   const redo = () => {
     if (!canvas || redoStack.current.length === 0) return;
-    undoStack.current.push(JSON.stringify(canvas.toJSON()));
+    undoStack.current.push(JSON.stringify(canvas.toDatalessJSON()));
     const last = redoStack.current.pop();
     canvas.loadFromJSON(last, () => canvas.renderAll());
   };
@@ -158,6 +162,8 @@ const Whiteboard = () => {
     canvas.clear();
     if (!isEditable) canvas.selection = false;
     sendDrawing({ toObject: () => ({ type: 'clear' }) });
+    undoStack.current.push(JSON.stringify(canvas.toDatalessJSON()));
+    redoStack.current = [];
   };
 
   const exportAsImage = () => {
@@ -180,25 +186,19 @@ const Whiteboard = () => {
       <div className="toolbar" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '10px', background: '#f4f4f4' }}>
         <button onClick={() => setIsEditable(true)} style={{ backgroundColor: '#2196F3', color: 'white' }}>Edit</button>
         <button onClick={() => setIsEditable(false)} style={{ backgroundColor: '#607D8B', color: 'white' }}>View</button>
-
         <button style={{ backgroundColor: '#4CAF50', color: 'white' }} onClick={enablePen} disabled={!isEditable}>Pen</button>
         <button style={{ backgroundColor: '#f44336', color: 'white' }} onClick={enableEraser} disabled={!isEditable}>Eraser</button>
         <button style={{ backgroundColor: '#3F51B5', color: 'white' }} onClick={addText} disabled={!isEditable}>Text</button>
-
         <input type="color" onChange={(e) => {
           if (canvas && canvas.isDrawingMode && canvas.freeDrawingBrush) {
             canvas.freeDrawingBrush.color = e.target.value;
           }
         }} />
-
         <input type="range" min="1" max="50" onChange={(e) => {
           if (canvas && canvas.isDrawingMode && canvas.freeDrawingBrush) {
             canvas.freeDrawingBrush.width = parseInt(e.target.value);
-          } else {
-            alert('Please enable the Pen tool first');
           }
         }} />
-
         <label>Shape:</label>
         <select onChange={(e) => addShape(e.target.value)} disabled={!isEditable}>
           <option value="">Select</option>
@@ -207,14 +207,12 @@ const Whiteboard = () => {
           <option value="triangle">Triangle</option>
           <option value="line">Line</option>
         </select>
-
         <button style={{ backgroundColor: '#FF9800', color: 'white' }} onClick={undo} disabled={!isEditable}>Undo</button>
         <button style={{ backgroundColor: '#FF5722', color: 'white' }} onClick={redo} disabled={!isEditable}>Redo</button>
         <button style={{ backgroundColor: '#9E9E9E', color: 'white' }} onClick={clearCanvas} disabled={!isEditable}>Clear</button>
         <button style={{ backgroundColor: '#009688', color: 'white' }} onClick={exportAsImage}>Export PNG</button>
         <button style={{ backgroundColor: '#673AB7', color: 'white' }} onClick={exportAsPDF}>Export PDF</button>
       </div>
-
       <canvas id="whiteboard" ref={canvasRef} />
     </div>
   );

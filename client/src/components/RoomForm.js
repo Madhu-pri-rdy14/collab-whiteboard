@@ -19,8 +19,8 @@ const RoomForm = () => {
     try {
       const endpoint = mode === 'create' ? '/api/create-room' : '/api/join-room';
 
-      // 👉 Change this to your actual backend URL if deployed
-      const backendUrl = 'http://localhost:3001'; // or use import.meta.env.VITE_API_URL
+      
+      const backendUrl = 'http://localhost:3001'; 
 
       const res = await axios.post(`${backendUrl}${endpoint}`, {
         roomId,

@@ -36,6 +36,7 @@ const RoomSchema = new mongoose.Schema({
   password: { type: String, required: true },
   createdAt: { type: Date, default: Date.now }
 });
+
 const Room = mongoose.model('Room', RoomSchema);
 
 const io = new Server(server, {
@@ -53,13 +54,16 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-  socket.on('join-room', async ({ roomId, username }) => {
+  socket.on('join-room', ({ roomId, username }) => {
     socket.join(roomId);
     socket.to(roomId).emit('user-joined', { username });
   });
 
-  socket.on('drawing', ({ roomId, data }) => {
-    io.to(roomId).emit('drawing', data);
+  socket.on('drawing', (json) => {
+    const rooms = [...socket.rooms].filter(r => r !== socket.id);
+    rooms.forEach(room => {
+      socket.to(room).emit('drawing', json);
+    });
   });
 
   socket.on('update-canvas', ({ roomId, data }) => {
@@ -75,7 +79,6 @@ io.on('connection', (socket) => {
 
 app.post('/api/create-room', async (req, res) => {
   const { roomId, password } = req.body;
-
   try {
     const existing = await Room.findOne({ roomId });
     if (existing) return res.status(400).json({ message: 'Room ID already exists' });
@@ -90,7 +93,6 @@ app.post('/api/create-room', async (req, res) => {
 
 app.post('/api/join-room', async (req, res) => {
   const { roomId, password } = req.body;
-
   try {
     const room = await Room.findOne({ roomId });
     if (!room) return res.status(404).json({ message: 'Room not found' });

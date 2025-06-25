@@ -9,7 +9,6 @@ const Whiteboard = () => {
   const canvasRef = useRef(null);
   const [canvas, setCanvas] = useState(null);
   const [isEditable, setIsEditable] = useState(true);
-
   const undoStack = useRef([]);
   const redoStack = useRef([]);
 
@@ -23,7 +22,7 @@ const Whiteboard = () => {
 
     const newCanvas = new fabric.Canvas('whiteboard', {
       isDrawingMode: false,
-      selection: isEditable,
+      selection: isEditable
     });
 
     newCanvas.setHeight(window.innerHeight - 70);
@@ -51,22 +50,16 @@ const Whiteboard = () => {
       });
     });
 
-    newCanvas.on('path:created', () => {
+    const broadcast = () => {
       const roomId = localStorage.getItem('roomId');
       const json = newCanvas.toDatalessJSON();
-      socket.emit('drawing', json);
-      undoStack.current.push(JSON.stringify(json));
-      redoStack.current = [];
-    });
-
-    const saveState = () => {
-      undoStack.current.push(JSON.stringify(newCanvas.toDatalessJSON()));
-      redoStack.current = [];
+      socket.emit('drawing', { roomId, data: json });
     };
 
-    newCanvas.on('object:added', saveState);
-    newCanvas.on('object:modified', saveState);
-    newCanvas.on('object:removed', saveState);
+    newCanvas.on('path:created', broadcast);
+    newCanvas.on('object:added', broadcast);
+    newCanvas.on('object:modified', broadcast);
+    newCanvas.on('object:removed', broadcast);
 
     return () => {
       socket.off('drawing');
@@ -78,7 +71,7 @@ const Whiteboard = () => {
   const sendDrawing = () => {
     const roomId = localStorage.getItem('roomId');
     const json = canvas.toDatalessJSON();
-    socket.emit('drawing', json);
+    socket.emit('drawing', { roomId, data: json });
   };
 
   const addShape = (type) => {
@@ -102,8 +95,6 @@ const Whiteboard = () => {
     }
     canvas.add(shape);
     sendDrawing();
-    undoStack.current.push(JSON.stringify(canvas.toDatalessJSON()));
-    redoStack.current = [];
   };
 
   const enablePen = () => {
@@ -132,8 +123,6 @@ const Whiteboard = () => {
     canvas.setActiveObject(text);
     canvas.renderAll();
     sendDrawing();
-    undoStack.current.push(JSON.stringify(canvas.toDatalessJSON()));
-    redoStack.current = [];
   };
 
   const undo = () => {
@@ -160,8 +149,6 @@ const Whiteboard = () => {
     canvas.clear();
     if (!isEditable) canvas.selection = false;
     sendDrawing();
-    undoStack.current.push(JSON.stringify(canvas.toDatalessJSON()));
-    redoStack.current = [];
   };
 
   const exportAsImage = () => {

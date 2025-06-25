@@ -29,11 +29,9 @@ app.use(cors({
 
 app.use(express.json());
 
-
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ MongoDB Error:", err.message));
-
 
 const RoomSchema = new mongoose.Schema({
   roomId: { type: String, required: true, unique: true },
@@ -41,7 +39,6 @@ const RoomSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 const Room = mongoose.model('Room', RoomSchema);
-
 
 const io = new Server(server, {
   cors: {
@@ -57,28 +54,32 @@ const io = new Server(server, {
   }
 });
 
-
 io.on("connection", (socket) => {
   console.log(`🔌 ${socket.id} connected`);
 
+  // Join room
   socket.on("join-room", async ({ roomId, username }) => {
     socket.join(roomId);
-    console.log(`${username} joined room ${roomId}`);
+    console.log(`👤 ${username} joined room ${roomId}`);
     socket.to(roomId).emit("user-joined", { username });
   });
 
+  
   socket.on("drawing", ({ roomId, data }) => {
-    socket.to(roomId).emit("drawing", data);
+    io.to(roomId).emit("drawing", data); 
   });
 
+  
   socket.on("update-canvas", ({ roomId, data }) => {
     socket.to(roomId).emit("update-canvas", data);
   });
 
+  
   socket.on("clear-canvas", (roomId) => {
-    socket.to(roomId).emit("clear-canvas");
+    io.to(roomId).emit("drawing", { type: "clear" });
   });
 
+  
   socket.on("disconnect", () => {
     console.log(`❌ ${socket.id} disconnected`);
   });
@@ -107,6 +108,7 @@ app.post('/api/create-room', async (req, res) => {
   }
 });
 
+
 app.post('/api/join-room', async (req, res) => {
   const { roomId, password } = req.body;
   console.log("🔑 Joining room:", roomId, password);
@@ -131,11 +133,9 @@ app.post('/api/join-room', async (req, res) => {
   }
 });
 
-
 app.get('/', (req, res) => {
   res.send('Whiteboard backend is running!');
 });
-
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {

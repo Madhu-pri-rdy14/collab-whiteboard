@@ -42,19 +42,28 @@ PORT=3001
 3. Install dependencies
 
 cd client
+
 npm install
 
 cd ../server
+
 npm install
 4. Run locally
+
 Start backend:
+
 cd server
+
 node server.js
+
 Start frontend:
 
 cd client
+
 npm start
+
  Live Demo
+ 
 Frontend: https://collab-whiteboard-sg6g.vercel.app
 
 Backend: https://collab-whiteboard-xcce.onrender.com

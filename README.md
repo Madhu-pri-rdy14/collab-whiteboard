@@ -33,10 +33,12 @@ In client/.env
 ini
 
 REACT_APP_SOCKET_URL=https://collab-whiteboard-xcce.onrender.com
+
 In server/.env
-ini
+
 
 MONGODB_URI=your_mongo_connection_string
+
 PORT=3001
 
 3. Install dependencies

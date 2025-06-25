@@ -27,6 +27,7 @@ collab-whiteboard/
 
 git clone https://github.com/Madhu-pri-rdy14/collab-whiteboard.git
 cd collab-whiteboard
+
 2. Setup environment files
 In client/.env
 ini
@@ -37,6 +38,7 @@ ini
 
 MONGODB_URI=your_mongo_connection_string
 PORT=3001
+
 3. Install dependencies
 
 cd client

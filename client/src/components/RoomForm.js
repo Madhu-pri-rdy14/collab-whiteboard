@@ -20,7 +20,7 @@ const RoomForm = () => {
       const endpoint = mode === 'create' ? '/api/create-room' : '/api/join-room';
 
       
-      const backendUrl = 'http://localhost:3001'; 
+     const backendUrl = 'https://collab-whiteboard-xcce.onrender.com'; 
 
       const res = await axios.post(`${backendUrl}${endpoint}`, {
         roomId,

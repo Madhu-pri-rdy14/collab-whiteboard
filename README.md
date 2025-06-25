@@ -18,8 +18,12 @@ Tech Stack
 Project Structure
 
 collab-whiteboard/
-├── client/ # React frontend
-└── server/ # Node.js backend
+├── client/ 
+
+React frontend
+
+└── server
+ Node.js backend
 
  Local Development
 

@@ -21,32 +21,24 @@ collab-whiteboard/
 ├── client/ # React frontend
 └── server/ # Node.js backend
 
-bash
-Copy
-Edit
-
  Local Development
 
  1. Clone the repository
-```bash
+
 git clone https://github.com/Madhu-pri-rdy14/collab-whiteboard.git
 cd collab-whiteboard
 2. Setup environment files
 In client/.env
 ini
-Copy
-Edit
+
 REACT_APP_SOCKET_URL=https://collab-whiteboard-xcce.onrender.com
 In server/.env
 ini
-Copy
-Edit
+
 MONGODB_URI=your_mongo_connection_string
 PORT=3001
 3. Install dependencies
-bash
-Copy
-Edit
+
 cd client
 npm install
 
@@ -54,17 +46,10 @@ cd ../server
 npm install
 4. Run locally
 Start backend:
-
-bash
-Copy
-Edit
 cd server
 node server.js
 Start frontend:
 
-bash
-Copy
-Edit
 cd client
 npm start
  Live Demo

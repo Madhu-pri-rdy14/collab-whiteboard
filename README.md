@@ -32,23 +32,23 @@ A real-time collaborative whiteboard application that allows multiple users to d
 
 User draws on canvas
 
-      ↓
+↓
 
 React captures mouse events → emits Socket.IO event with stroke data
 
-      ↓
+↓
 
 Node.js + Express server receives event
 
-      ↓
+↓
 
 Server broadcasts to all clients in the same room (Socket.IO rooms)
 
-      ↓
+↓
 
 Other clients render the stroke on their canvas in real time
 
-      ↓
+↓
 
 Stroke persisted to MongoDB Atlas for new users joining the room
 

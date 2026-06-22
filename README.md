@@ -72,6 +72,6 @@ Frontend: https://collab-whiteboard-six.vercel.app/
 
 Backend: https://collab-whiteboard-oriq.onrender.com
 
-Author
-Madhu Priya
+Author  Madhu Priya
+
 GitHub: Madhu-pri-rdy14
